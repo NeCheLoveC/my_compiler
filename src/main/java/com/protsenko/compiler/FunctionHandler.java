@@ -1,7 +1,6 @@
 package com.protsenko.compiler;
 
 import com.protsenko.compiler.operators.Handler;
-import com.protsenko.compiler.operators.Operator;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,7 +12,7 @@ public class FunctionHandler implements Handler
     }
 
 
-    public Function.FunctionBuilder build(Parser parser) {
+    public Function.FunctionBuilder build(ProgramParser parser) {
         Function.FunctionBuilder builder = Function.getBuilder();
 
 

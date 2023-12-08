@@ -1,6 +1,7 @@
 package com.protsenko.compiler;
 
 import com.protsenko.compiler.operators.Operator;
+import com.protsenko.compiler.operators.ParserAbstract;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.HashMap;
@@ -17,24 +18,28 @@ public class Function
     private List<Operator> operators = new LinkedList<>();
     private Coordinate currentCoordinate;
 
+
     public String convertToJavaCode()
     {
         // TODO: 26.11.2023 Добавить к сигнатуру метода перед телом функции
         return operators.stream().map(o -> o.convertToJavaCode()).collect(Collectors.joining());
     }
 
-    public static FunctionBuilder getBuilder()
+    public static FunctionBuilder getBuilder(Coordinate start)
     {
-        return new FunctionBuilder();
+        return new FunctionBuilder(start);
     }
 
-    public static class FunctionBuilder
+    public static class FunctionBuilder extends ParserAbstract
     {
         String code = "";
         String name = "";
         private Class<?> returnedType;
         private Map<String, Class> params;
-        private Coordinate startBlock;
+
+        public FunctionBuilder(Coordinate currentCoordinate) {
+            super(currentCoordinate);
+        }
 
         public FunctionBuilder setCode(String code) {
             this.code = code;

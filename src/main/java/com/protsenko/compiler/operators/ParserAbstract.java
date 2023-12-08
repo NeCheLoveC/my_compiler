@@ -1,6 +1,8 @@
 package com.protsenko.compiler.operators;
 
 import com.protsenko.compiler.Coordinate;
+import com.protsenko.compiler.VariableDeclaration;
+
 
 import java.io.IOException;
 import java.util.Optional;
@@ -8,9 +10,15 @@ import java.util.Stack;
 
 public abstract class ParserAbstract
 {
-    private Coordinate currentCoordinate;
-    private String expectedBlockCode()
+    protected Coordinate currentCoordinate;
+    protected boolean isStringLiteral = false;
+
+    public ParserAbstract(Coordinate currentCoordinate)
     {
+        this.currentCoordinate = currentCoordinate;
+    }
+
+    protected String expectedBlockCode() throws IOException {
         StringBuilder block = new StringBuilder();
         expectedCharIs('{', "Ожидалось - {");
         Stack<Character> brackets = new Stack<>();
@@ -189,6 +197,41 @@ public abstract class ParserAbstract
         return stringLiteral.toString();
     }
 
+    protected final int nextChar() throws IOException
+    {
+        int c = next();
+        currentCoordinate.setCurrentChar(c);
+        if(c == '\n')
+        {
+            currentCoordinate.addPositionY();
+        }
+        else
+        {
+            currentCoordinate.addPositionX();
+        }
+        if(c == '"')
+        {
+            this.isStringLiteral = !isStringLiteral;
+        }
+        /*
+        if(!isEndOfFile())
+        {
+            if(c == '\n')
+            {
+                currentCoordinate.addPositionY();
+            }
+            else
+            {
+                currentCoordinate.addPositionX();
+            }
+            if(c == '"')
+            {
+                this.isStringLiteral = !isStringLiteral;
+            }
+        }
+         */
+        return c;
+    }
 
-    abstract int nextChar() throws IOException;
+    protected abstract int next() throws IOException;
 }

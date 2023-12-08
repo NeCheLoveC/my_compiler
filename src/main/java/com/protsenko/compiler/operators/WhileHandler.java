@@ -1,6 +1,5 @@
 package com.protsenko.compiler.operators;
 
-import com.protsenko.compiler.Converter;
 import org.springframework.stereotype.Component;
 
 @Component

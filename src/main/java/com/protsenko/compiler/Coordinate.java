@@ -2,18 +2,28 @@ package com.protsenko.compiler;
 
 public class Coordinate implements Cloneable
 {
-    int positionX = -1;
-    private int positionY = 0;
-    int count = 0;
+    int positionX;
+    private int positionY;
+    int count;
     //-1 - конец файла
     //-2 - итерация по файлу еще не началась
-    int currentChar = -2;
+
+    int currentChar;
+
+    public Coordinate()
+    {
+        positionY = 1;
+        positionX = -1;
+        count = 0;
+        currentChar = -2;
+    }
 
     public int getPositionX() {
         return positionX;
     }
 
     public void addPositionX() {
+        count++;
         this.positionX++;
     }
 
@@ -23,7 +33,7 @@ public class Coordinate implements Cloneable
 
     public void addPositionY() {
         this.positionY++;
-        this.positionX = 0;
+        this.positionX = -1;
         this.count++;
     }
 
@@ -38,6 +48,10 @@ public class Coordinate implements Cloneable
     public void addCount()
     {
         this.count++;
+    }
+
+    public int getCount() {
+        return count;
     }
 
     @Override

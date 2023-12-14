@@ -1,28 +1,22 @@
-package com.protsenko.compiler;
+package com.protsenko.test;
 
-import com.protsenko.compiler.operators.ParserAbstract;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.ImportResource;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-import org.springframework.validation.Validator;
-import org.springframework.validation.annotation.Validated;
+import com.protsenko.compiler.Coordinate;
+import com.protsenko.test.entity.Function;
+import com.protsenko.test.entity.RawFunction;
+import com.protsenko.test.entity.VariableDeclaration;
+import com.protsenko.test.parser.ParserAbstract;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.rmi.RemoteException;
 import java.util.*;
 
 public class ProgramParser extends ParserAbstract
 {
-    private String path;
+    private String path = "test";
     private FileInputStream file;
     private String fileName = "index";
-    private Map<String,Function> functionSet = new HashMap<>();
+    //private Map<String, Function> functionMap = new HashMap<>();
 
     public ProgramParser(String path) throws IOException {
         super(new Coordinate());
@@ -30,15 +24,16 @@ public class ProgramParser extends ParserAbstract
         this.currentCoordinate = new Coordinate();
     }
 
-    public Map<String, Function.FunctionBuilder> parse() throws IOException, CloneNotSupportedException {
+    public Map<String, RawFunction> parse() throws IOException, CloneNotSupportedException {
         nextChar();
-        Map<String, Function.FunctionBuilder> functionBuilders = getAllPreFunctions();
+        Map<String, RawFunction> functionBuilders = getAllPreFunctions();
+        return functionBuilders;
     }
 
-    private Map<String, Function.FunctionBuilder> getAllPreFunctions() throws IOException, CloneNotSupportedException {
+    private Map<String, RawFunction> getAllPreFunctions() throws IOException, CloneNotSupportedException {
         nextChar();
         skipSpaceChars();
-        Map<String, Function.FunctionBuilder> functionBuilderMap = new HashMap<>();
+        Map<String, RawFunction> functionBuilderMap = new HashMap<>();
 
         while(!isEndOfFile())
         {
@@ -52,62 +47,60 @@ public class ProgramParser extends ParserAbstract
             Coordinate coordinateBeforeFuncName = getCopyCoordinate();
             Class typeForReturn = getReturnedTypeClassByString(returnedType, coordinate, "Ожидался один из возможных возвращаемых типов");
             String nameFunction = getNextIdenteficator("Ожидалось имя функции",null);
-            if(functionSet.containsKey(nameFunction))
+            /*
+            if(functionMap.containsKey(nameFunction))
             {
                 throw new RuntimeException("Функция с данным именем была объявлена (" + nameFunction + ")" + "\n" + coordinateBeforeFuncName.getPositionY() + ":" + coordinateBeforeFuncName.getPositionX());
             }
+             */
             skipSpaceChars();
             expectedCharIs('(', "Ожидалось '('\n" + currentCoordinate);
             skipSpaceChars();
 
-            Map<String, Class> variablesOfFunc = new HashMap<>();
+            Map<String, Class> paramsOfFunc = new HashMap<>();
             if(currentCoordinate.getCurrentChar() == ')')
             {
                 nextChar();
-                continue;
+                skipSpaceChars();
+                String blockCode = expectedBlockCode();
             }
-            else if(currentCoordinate.getCurrentChar() == -1)
+            else if(isEndOfFile())
             {
-                throw new RuntimeException("Ожидалось (\n" + currentCoordinate);
+                throw new RuntimeException("Непредвиденный конец файла.Ожидалось - (\n" + currentCoordinate);
             }
             else
             {
                 //получить список параметров функции
-                expectedVariableDeclaration();
-                while(currentCoordinate.getCurrentChar() != ')' && currentCoordinate.getCurrentChar() != -1)
+                VariableDeclaration firstVar = expectedVariableDeclaration();
+                skipSpaceChars();
+                paramsOfFunc.put(firstVar.getName(),firstVar.getType());
+                while(currentCoordinate.getCurrentChar() != ')' && !isEndOfFile())
                 {
-                    skipSpaceChars();
                     expectedCharIs(',', "Параметры функции должны быть разделены ,");
                     skipSpaceChars();
                     Coordinate coordinateBeforeVarDecl = getCopyCoordinate();
                     VariableDeclaration variable = expectedVariableDeclaration();
                     //Если хеш-мап уже содержит параметра с данным именем - выкинуть ошибку
-                    if(variablesOfFunc.putIfAbsent(variable.getName(), variable.getType()) != null)
+                    if(paramsOfFunc.putIfAbsent(variable.getName(), variable.getType()) != null)
                     {
-                        throw new RuntimeException("Повторяющееся имя.\n" + coordinateBeforeVarDecl.getPositionY() + ":" + coordinateBeforeVarDecl.getPositionX());
+                        throw new RuntimeException("Повторяющееся имя параметра функции.\n" + coordinateBeforeVarDecl.getPositionY() + ":" + coordinateBeforeVarDecl.getPositionX());
                     }
+                    skipSpaceChars();
                 }
                 expectedCharIs(')', "Ожидался символ )\n" + currentCoordinate);
             }
             skipSpaceChars();
             Coordinate coordinateWhenStartFuncBlock = getCopyCoordinate();
             String block = expectedBlockCode();
-            Function.FunctionBuilder functionBuilder = Function.getBuilder();
-            functionBuilder
-                    .setName(nameFunction)
-                    .setParams(variablesOfFunc)
-                    .setReturnedType(typeForReturn)
-                    .setCode(block)
-                    .setStartBlock(coordinateWhenStartFuncBlock);
+            RawFunction newFunc = new RawFunction(nameFunction, typeForReturn,paramsOfFunc,coordinateWhenStartFuncBlock, block);
             //Если имя функции уже зарезервировано - кинуть ошибку
-            if(functionBuilderMap.putIfAbsent(functionBuilder.getName(), functionBuilder) != null)
+            if(functionBuilderMap.putIfAbsent(newFunc.getName(), newFunc) != null)
             {
                 throw new RuntimeException("Имя функции уже зарезервировано\n" + coordinateBeforeFuncName);
             }
-            skipSpaceChars();
         }
+        skipSpaceChars();
         return functionBuilderMap;
-        //\w[\w\d]*\s*
     }
 
 
@@ -137,7 +130,7 @@ public class ProgramParser extends ParserAbstract
         }
         token.append(currentCoordinate.getCurrentChar());
         nextChar();
-        while(!Character.isSpaceChar(currentCoordinate.getCurrentChar()) && !isEndOperatorOrStartBlock(currentCoordinate.getCurrentChar()))
+        while(!Character.isSpaceChar(currentCoordinate.getCurrentChar()) && !isEndOperatorOrStartBlock())
         {
             if(isEndOfFile())
                 return token.toString();

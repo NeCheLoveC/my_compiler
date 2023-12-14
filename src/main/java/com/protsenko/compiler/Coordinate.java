@@ -18,6 +18,15 @@ public class Coordinate implements Cloneable
         currentChar = -2;
     }
 
+    public Coordinate(Coordinate coordinate)
+    {
+        positionY = coordinate.getPositionY();
+        positionX = coordinate.getPositionX();
+        count = 0;
+        //currentChar = coordinate.getCurrentChar();
+        currentChar = -2;
+    }
+
     public int getPositionX() {
         return positionX;
     }
@@ -56,7 +65,8 @@ public class Coordinate implements Cloneable
 
     @Override
     public Coordinate clone() throws CloneNotSupportedException {
-        return (Coordinate)super.clone();
+        Coordinate clone = (Coordinate)super.clone();
+        return clone;
     }
 
     @Override

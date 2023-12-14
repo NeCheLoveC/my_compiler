@@ -1,11 +1,7 @@
 package com.protsenko.compiler;
 
-import com.protsenko.compiler.operators.ParserAbstract;
-import org.springframework.stereotype.Component;
-
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 
 
 public class FunctionController

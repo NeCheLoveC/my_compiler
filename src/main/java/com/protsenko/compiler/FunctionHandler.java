@@ -1,6 +1,7 @@
 package com.protsenko.compiler;
 
-import com.protsenko.compiler.operators.Handler;
+import com.protsenko.test.handlers.Handler;
+import com.protsenko.test.ProgramParser;
 import org.springframework.stereotype.Component;
 
 @Component

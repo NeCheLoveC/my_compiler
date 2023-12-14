@@ -1,9 +1,7 @@
-package com.protsenko.compiler.operators;
+package com.protsenko.test.parser;
 
 import com.protsenko.compiler.Coordinate;
-import com.protsenko.compiler.VariableDeclaration;
-
-
+import com.protsenko.test.entity.VariableDeclaration;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Stack;
@@ -12,15 +10,19 @@ public abstract class ParserAbstract
 {
     protected Coordinate currentCoordinate;
     protected boolean isStringLiteral = false;
+    protected static final char END_OPERATOR = ';';
+    protected static final char START_BLOCK_CODE = '{';
+    protected static final char END_BLOCK_CODE = '}';;
 
     public ParserAbstract(Coordinate currentCoordinate)
     {
-        this.currentCoordinate = currentCoordinate;
+        this.currentCoordinate = new Coordinate(currentCoordinate);
     }
 
     protected String expectedBlockCode() throws IOException {
         StringBuilder block = new StringBuilder();
         expectedCharIs('{', "Ожидалось - {");
+        block.append((char)currentCoordinate.getCurrentChar());
         Stack<Character> brackets = new Stack<>();
         brackets.add((char)this.currentCoordinate.getCurrentChar());
         //Пропускаем все
@@ -47,14 +49,18 @@ public abstract class ParserAbstract
         return block.toString();
     }
 
+//    @Deprecated
     protected VariableDeclaration expectedVariableDeclaration() throws CloneNotSupportedException, IOException {
-        Coordinate coordinate;
-        coordinate = getCopyCoordinate();
+        Coordinate coordinate = getCopyCoordinate();
         String paramType2 = getNextOnlyLetterToken("Ожидалось объявление параметра в формате: ТИП ИДЕНТИФИКАТОР", Optional.of(coordinate));
+        Class returnedType = getReturnedTypeClassByString(paramType2,coordinate, "Ожидалось объявление параметра в формате: ТИП ИДЕНТИФИКАТОР");
         oneOrMoreSpaceChar("Ожидалось объявление параметра в формате: ТИП ИДЕНТИФИКАТОР", coordinate);
-        String paramName2 = getNextIdenteficator("Ожидалось объявление идентификатора", null);
+        Coordinate beforeName = getCopyCoordinate();
+        String paramName2 = getNextIdenteficator("Ожидалось объявление идентификатора", Optional.of(beforeName));
         //skipSpaceChars();
-        return new VariableDeclaration(paramName2, getReturnedTypeClassByString(paramType2,coordinate, "Ожидался ТИП ИДЕНТИФИКАТОРА"));
+        //throw new RemoteException("Метод устарел");
+
+        return new VariableDeclaration(paramName2,returnedType,"null");
     }
 
     protected void expectedCharIs(char ch, String message) throws IOException {
@@ -147,6 +153,22 @@ public abstract class ParserAbstract
         nextChar();
     }
 
+    protected boolean nextSequenceIsEqual(String pattern) throws IOException, CloneNotSupportedException {
+        if(pattern == null)
+            throw new NullPointerException("nextTokenIsEqualTo был передан null параметр");
+        Coordinate startCoordinate = getCopyCoordinate();
+        for (int i = 0; i < pattern.length(); i++)
+        {
+            if(pattern.charAt(i) != currentCoordinate.getCurrentChar())
+            {
+                this.currentCoordinate = startCoordinate;
+                return false;
+            }
+            nextChar();
+        }
+        return true;
+    }
+
     protected Coordinate getCopyCoordinate() throws CloneNotSupportedException {
         return (Coordinate) this.currentCoordinate.clone();
     }
@@ -159,12 +181,12 @@ public abstract class ParserAbstract
 
     protected boolean isEndOfBlock()
     {
-        return currentCoordinate.getCurrentChar() == '}';
+        return !isStringLiteral && (currentCoordinate.getCurrentChar() == END_BLOCK_CODE);
     }
 
     protected boolean isStartBlockCode()
     {
-        return this.currentCoordinate.getCurrentChar() == '{';
+        return (this.currentCoordinate.getCurrentChar() == START_BLOCK_CODE) && !isStringLiteral;
     }
 
     protected boolean isStartStringLiteral()
@@ -172,9 +194,9 @@ public abstract class ParserAbstract
         return currentCoordinate.getCurrentChar() == '"';
     }
 
-    protected boolean isEndOperatorOrStartBlock(int charCode)
+    protected boolean isEndOperatorOrStartBlock()
     {
-        return charCode == '{' || charCode == ';';
+        return !isStringLiteral && ((currentCoordinate.getCurrentChar() == START_BLOCK_CODE) || (currentCoordinate.getCurrentChar() == END_OPERATOR));
     }
 
     protected boolean isEndOfFile()
@@ -233,5 +255,35 @@ public abstract class ParserAbstract
         return c;
     }
 
+    public Coordinate getCurrentCoordinate() {
+        return currentCoordinate;
+    }
+
+    public void setCurrentCoordinate(Coordinate currentCoordinate) {
+        this.currentCoordinate = currentCoordinate;
+    }
+
     protected abstract int next() throws IOException;
+
+    protected String expectedStatment() throws IOException {
+        StringBuilder statment = new StringBuilder();
+
+        //Ожидаем все кроме конца файла, {, }, ;
+        while(!isEndOfFile() && !isEndOperatorOrStartBlock() && !isEndOfBlock() && !isComma())
+        {
+            statment.append((char) currentCoordinate.getCurrentChar());
+            nextChar();
+        }
+        return statment.toString().trim();
+    }
+
+    protected boolean isEndOperator()
+    {
+        return !isStringLiteral && (currentCoordinate.getCurrentChar() == ';');
+    }
+
+    protected boolean isComma()
+    {
+        return !isStringLiteral && (currentCoordinate.getCurrentChar() == ',');
+    }
 }

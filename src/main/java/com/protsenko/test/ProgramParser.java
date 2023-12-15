@@ -1,8 +1,7 @@
 package com.protsenko.test;
 
-import com.protsenko.compiler.Coordinate;
-import com.protsenko.test.entity.Function;
 import com.protsenko.test.entity.RawFunction;
+import com.protsenko.test.entity.RawProgram;
 import com.protsenko.test.entity.VariableDeclaration;
 import com.protsenko.test.parser.ParserAbstract;
 
@@ -24,10 +23,10 @@ public class ProgramParser extends ParserAbstract
         this.currentCoordinate = new Coordinate();
     }
 
-    public Map<String, RawFunction> parse() throws IOException, CloneNotSupportedException {
+    public RawProgram parse() throws IOException, CloneNotSupportedException {
         nextChar();
         Map<String, RawFunction> functionBuilders = getAllPreFunctions();
-        return functionBuilders;
+        return new RawProgram(functionBuilders);
     }
 
     private Map<String, RawFunction> getAllPreFunctions() throws IOException, CloneNotSupportedException {
@@ -47,12 +46,6 @@ public class ProgramParser extends ParserAbstract
             Coordinate coordinateBeforeFuncName = getCopyCoordinate();
             Class typeForReturn = getReturnedTypeClassByString(returnedType, coordinate, "Ожидался один из возможных возвращаемых типов");
             String nameFunction = getNextIdenteficator("Ожидалось имя функции",null);
-            /*
-            if(functionMap.containsKey(nameFunction))
-            {
-                throw new RuntimeException("Функция с данным именем была объявлена (" + nameFunction + ")" + "\n" + coordinateBeforeFuncName.getPositionY() + ":" + coordinateBeforeFuncName.getPositionX());
-            }
-             */
             skipSpaceChars();
             expectedCharIs('(', "Ожидалось '('\n" + currentCoordinate);
             skipSpaceChars();

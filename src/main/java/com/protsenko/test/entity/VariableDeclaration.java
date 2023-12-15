@@ -1,6 +1,6 @@
 package com.protsenko.test.entity;
 
-public class VariableDeclaration
+public class VariableDeclaration implements Operator
 {
     private String name;
     private Class type;
@@ -34,5 +34,32 @@ public class VariableDeclaration
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    @Override
+    public String convertToJavaCode()
+    {
+        StringBuilder result = new StringBuilder();
+        if(this.type == Boolean.class)
+        {
+            result.append("Boolean ");
+        }
+        else if(this.type == Long.class)
+        {
+            result.append("Long ");
+        }
+        else if(this.type == String.class)
+        {
+            result.append("String ");
+        }
+        else if(this.type == Double.class)
+        {
+            result.append("Double ");
+        }
+        result.append(name);
+        result.append("=");
+        result.append(value);
+        result.append(";\n");
+        return result.toString();
     }
 }

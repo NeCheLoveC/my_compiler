@@ -1,9 +1,8 @@
 package com.protsenko.test.parser;
 
-import com.protsenko.compiler.Coordinate;
+import com.protsenko.test.Coordinate;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.Optional;
 import java.util.Stack;
 

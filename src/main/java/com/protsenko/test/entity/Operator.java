@@ -1,4 +1,4 @@
-package com.protsenko.compiler.operators;
+package com.protsenko.test.entity;
 
 public interface Operator
 {

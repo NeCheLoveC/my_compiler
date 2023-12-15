@@ -1,22 +1,26 @@
 package com.protsenko.test.parser;
 
-import com.protsenko.compiler.Coordinate;
+import com.protsenko.test.Coordinate;
+import com.protsenko.test.entity.Operator;
+import com.protsenko.test.entity.RawProgram;
+
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.Stack;
 
 public abstract class StringParser extends ParserAbstract
 {
     protected String code;
     protected StringWithBlockAbstractParser parent;
+    protected RawProgram rawProgram;
 
-    public StringParser(Coordinate currentCoordinate, String code) {
+    public StringParser(Coordinate currentCoordinate, String code, RawProgram rawProgram) {
         super(currentCoordinate);
+        this.rawProgram = rawProgram;
         this.code = code;
     }
 
-    public StringParser(Coordinate currentCoordinate, String code, StringWithBlockAbstractParser parent) {
-        this(currentCoordinate, code);
+    public StringParser(Coordinate currentCoordinate, String code, StringWithBlockAbstractParser parent,RawProgram rawProgram) {
+        this(currentCoordinate, code, rawProgram);
         this.parent = parent;
     }
 
@@ -69,9 +73,14 @@ public abstract class StringParser extends ParserAbstract
         return predicate.toString().trim();
     }
 
+
     public boolean validateStatement(String statement, Coordinate coordinateStart)
     {
 
+    }
+
+    public boolean validateStatement(String statement,Coordinate coordinateStart, Class expectedReturn)
+    {
     }
 
     public String nextPartOfStatement(Coordinate coordinate)
@@ -114,6 +123,7 @@ public abstract class StringParser extends ParserAbstract
             result =  new IfParser(startToken,token,parent);
         else if(token.matches("^(\\w[\\w\\d]*\\s*" + DeclareVariableParse.operator + "\\s*)"))
         {
+
             //присвоение к уже существ. переменной
         }
         else if(token.matches("^(_?\\w[\\w\\d]*\\()"))
@@ -145,6 +155,6 @@ public abstract class StringParser extends ParserAbstract
         return result;
     }
 
-    public abstract void parse() throws IOException, CloneNotSupportedException;
+    public abstract Operator parse() throws IOException, CloneNotSupportedException;
 
 }

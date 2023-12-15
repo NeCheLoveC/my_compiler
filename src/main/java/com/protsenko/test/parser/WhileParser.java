@@ -1,11 +1,14 @@
 package com.protsenko.test.parser;
 
-import com.protsenko.compiler.Coordinate;
+import com.protsenko.test.Coordinate;
+import com.protsenko.test.entity.Operator;
+
 import java.io.IOException;
+import java.util.List;
 
 public class WhileParser extends StringWithBlockAbstractParser
 {
-    private static final String PATTERN = "while";
+    public static final String PATTERN = "cycle";
     private String predicate;
 
     public WhileParser(Coordinate currentCoordinate, String code, StringWithBlockAbstractParser parent) {
@@ -14,14 +17,15 @@ public class WhileParser extends StringWithBlockAbstractParser
     }
 
     @Override
-    public void parse() throws IOException, CloneNotSupportedException
+    public Operator parse() throws IOException, CloneNotSupportedException
     {
-        nextSequenceIsEqualToOrThrow("while", getCopyCoordinate(), "Ожидался оператор while");
+        nextSequenceIsEqualToOrThrow(PATTERN, getCopyCoordinate(), "Ожидался оператор " + PATTERN);
         skipSpaceChars();
         String predicate = expectedPredicate();
         this.predicate = predicate;
         skipSpaceChars();
-        parseBlock();
+        List<Operator> operatorList = parseBlock();
+        return new WhileUnit()
     }
 
     @Override

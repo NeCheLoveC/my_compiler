@@ -1,4 +1,4 @@
-package com.protsenko.compiler;
+package com.protsenko.test;
 
 public class Coordinate implements Cloneable
 {

@@ -1,19 +1,21 @@
 package com.protsenko.test.parser;
 
-import com.protsenko.compiler.Coordinate;
+import com.protsenko.test.Coordinate;
+import com.protsenko.test.entity.Operator;
 import com.protsenko.test.Validated;
+import com.protsenko.test.entity.RawProgram;
 import com.protsenko.test.entity.VariableDeclaration;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.Optional;
 
 public class DeclareVariableParse extends StringParser implements Validated
 {
     public static final Character operator = '=';
     private VariableDeclaration variableDeclaration;
-    public DeclareVariableParse(Coordinate currentCoordinate, String code, StringWithBlockAbstractParser parent) {
-        super(currentCoordinate, code, parent);
+
+    public DeclareVariableParse(Coordinate currentCoordinate, String code, StringWithBlockAbstractParser parent, RawProgram rawProgram) {
+        super(currentCoordinate, code, parent, rawProgram);
     }
 
     @Override
@@ -22,7 +24,7 @@ public class DeclareVariableParse extends StringParser implements Validated
     }
 
     @Override
-    public void parse() throws IOException, CloneNotSupportedException {
+    public Operator parse() throws IOException, CloneNotSupportedException {
         Coordinate coordinate = getCopyCoordinate();
         String rawType = getNextOnlyLetterToken("Ожидалось объявление переменной", null);
         oneOrMoreSpaceChar("Ожидалось объявление переменной", coordinate);
@@ -40,6 +42,7 @@ public class DeclareVariableParse extends StringParser implements Validated
         this.variableDeclaration = new VariableDeclaration(varName, returnedType, stm);
         validated();
         parent.addVarsIntoScope(this.variableDeclaration);
+        return this.variableDeclaration;
     }
 
     @Override

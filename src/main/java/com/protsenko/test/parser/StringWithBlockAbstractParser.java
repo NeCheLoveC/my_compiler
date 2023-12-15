@@ -1,7 +1,9 @@
 package com.protsenko.test.parser;
 
-import com.protsenko.compiler.Coordinate;
+import com.protsenko.test.Coordinate;
+import com.protsenko.test.entity.Operator;
 import com.protsenko.test.OperatorsManager;
+import com.protsenko.test.entity.RawProgram;
 import com.protsenko.test.entity.VariableDeclaration;
 
 import java.io.IOException;
@@ -17,8 +19,8 @@ public abstract class StringWithBlockAbstractParser extends StringParser impleme
     protected Map<String, VariableDeclaration> scopeVars = new HashMap<>();
     protected OperatorsManager operatorsManager;
 
-    public StringWithBlockAbstractParser(Coordinate currentCoordinate, String code, StringWithBlockAbstractParser parent, OperatorsManager operatorManager) {
-        super(currentCoordinate, code, parent);
+    public StringWithBlockAbstractParser(Coordinate currentCoordinate, String code, StringWithBlockAbstractParser parent, OperatorsManager operatorManager, RawProgram rawProgram) {
+        super(currentCoordinate, code, parent, rawProgram);
         this.operatorsManager = operatorManager;
     }
 
@@ -38,17 +40,19 @@ public abstract class StringWithBlockAbstractParser extends StringParser impleme
         this.childrens.add(stringParser);
     }
 
-    protected void parseBlock() throws IOException, CloneNotSupportedException {
+    protected List<Operator> parseBlock() throws IOException, CloneNotSupportedException {
         expectedCharIs('{', "Ожидался символ - {");
         skipSpaceChars();
+        List<Operator> operators = new LinkedList<>();
         while(!isEndOfBlock())
         {
+            Coordinate startOperator = getCopyCoordinate();
             String rawOperator = getNextOperator();
-            StringParser operator = convertToStringParser(rawOperator,this);
-            operator.parse();
+            StringParser operator = convertToStringParser(rawOperator,this,startOperator);
+            operators.add(operator.parse());
             addStringParserChild(operator);
             skipSpaceChars();
         }
+        return operators;
     }
-
 }

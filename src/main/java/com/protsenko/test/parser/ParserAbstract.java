@@ -1,6 +1,6 @@
 package com.protsenko.test.parser;
 
-import com.protsenko.compiler.Coordinate;
+import com.protsenko.test.Coordinate;
 import com.protsenko.test.entity.VariableDeclaration;
 import java.io.IOException;
 import java.util.Optional;
@@ -57,11 +57,9 @@ public abstract class ParserAbstract
         oneOrMoreSpaceChar("Ожидалось объявление параметра в формате: ТИП ИДЕНТИФИКАТОР", coordinate);
         Coordinate beforeName = getCopyCoordinate();
         String paramName2 = getNextIdenteficator("Ожидалось объявление идентификатора", Optional.of(beforeName));
-        //skipSpaceChars();
-        //throw new RemoteException("Метод устарел");
-
         return new VariableDeclaration(paramName2,returnedType,"null");
     }
+    
 
     protected void expectedCharIs(char ch, String message) throws IOException {
         if(currentCoordinate.getCurrentChar() != ch)
@@ -113,10 +111,10 @@ public abstract class ParserAbstract
     protected String getNextIdenteficator(String message, Optional<Coordinate> coordinate) throws IOException {
         if(coordinate == null || coordinate.isEmpty())
             coordinate = Optional.of(currentCoordinate);
-        if(Character.isLetter(currentCoordinate.getCurrentChar())
+        if(!Character.isLetter(currentCoordinate.getCurrentChar())
             //currentCoordinate.getCurrentChar() == '"' || currentCoordinate.getCurrentChar() == '(' || currentCoordinate.getCurrentChar() == ')'
         )
-            throw new RuntimeException(coordinate.get().getPositionX() + ":" + coordinate.get().getPositionY() + "\n" + message);
+            throw new RuntimeException("Ожидался вызов функции (неверно задан идентификатор)" + coordinate);
         StringBuilder result = new StringBuilder();
         result.append((char)this.currentCoordinate.getCurrentChar());
 
@@ -235,23 +233,6 @@ public abstract class ParserAbstract
         {
             this.isStringLiteral = !isStringLiteral;
         }
-        /*
-        if(!isEndOfFile())
-        {
-            if(c == '\n')
-            {
-                currentCoordinate.addPositionY();
-            }
-            else
-            {
-                currentCoordinate.addPositionX();
-            }
-            if(c == '"')
-            {
-                this.isStringLiteral = !isStringLiteral;
-            }
-        }
-         */
         return c;
     }
 
@@ -265,17 +246,94 @@ public abstract class ParserAbstract
 
     protected abstract int next() throws IOException;
 
-    protected String expectedStatment() throws IOException {
+    protected String expectedStatment() throws IOException, CloneNotSupportedException {
         StringBuilder statment = new StringBuilder();
 
+        Coordinate coordinateStart = getCopyCoordinate();
+//        while(isEndOperator())
+//        {
+            /*
+
+            if(Character.isLetter(currentCoordinate.getCurrentChar()))
+            {
+                //или илентификатор или вызов функции
+                String id = getNextOnlyLetterToken("тест", Optional.of(coordinateStart));
+            }
+            else if(currentCoordinate.getCurrentChar() == '_')
+            {
+                //вызов встроенной функции
+                nextChar();
+                String idFunc = "_" + getNextOnlyLetterToken("тест", Optional.of(coordinateStart));
+            }
+            else if(Character.isDigit(currentCoordinate.getCurrentChar()))
+            {
+                //Значит это или long, или double
+                String num = expectedNum();
+
+            }
+            else if(isStartStringLiteral())
+            {
+                String string = getStringLiteral();
+            }
+            else if(currentCoordinate.getCurrentChar() == '!')
+            {
+
+            }
+            else if(currentCoordinate.getCurrentChar() == '-')
+            {
+
+            }
+            else if(currentCoordinate.getCurrentChar() == '(')
+            {
+
+            }
+            else if(currentCoordinate.getCurrentChar() == ')')
+            {
+
+            }
+            else if(currentCoordinate.getCurrentChar() == '+')
+            {
+
+            }
+            else if(currentCoordinate.getCurrentChar() == '/')
+            {
+
+            }
+            else if(currentCoordinate.getCurrentChar() == '*')
+            {
+
+            }
+            else if(currentCoordinate.getCurrentChar() == '>')
+            {
+
+            }
+            else if(currentCoordinate.getCurrentChar() == '<')
+            {
+
+            }
+            else if(currentCoordinate.getCurrentChar() == '=')
+            {
+
+            }
+            else if(currentCoordinate.getCurrentChar() == '.')
+            {
+
+            }
+
+             */
+//        }
         //Ожидаем все кроме конца файла, {, }, ;
-        while(!isEndOfFile() && !isEndOperatorOrStartBlock() && !isEndOfBlock() && !isComma())
+        // TODO: 15.12.2023 Тут !isComma было 
+        while(!isEndOfFile() && !isEndOperatorOrStartBlock() && !isEndOfBlock())
         {
             statment.append((char) currentCoordinate.getCurrentChar());
             nextChar();
         }
+        if(!isEndOperator())
+            throw new RuntimeException("Ожидался - " + ParserAbstract.END_OPERATOR + "" + currentCoordinate)
         return statment.toString().trim();
     }
+
 
     protected boolean isEndOperator()
     {

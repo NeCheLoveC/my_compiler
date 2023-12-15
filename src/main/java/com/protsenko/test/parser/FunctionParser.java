@@ -1,16 +1,15 @@
 package com.protsenko.test.parser;
 
-import com.protsenko.compiler.Coordinate;
+import com.protsenko.test.Coordinate;
 import com.protsenko.test.entity.*;
 
-import com.protsenko.compiler.operators.Operator;
+import com.protsenko.test.entity.Operator;
 
 import com.protsenko.test.OperatorsManager;
 import com.protsenko.test.entity.RawProgram;
 
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -20,9 +19,8 @@ public class FunctionParser extends StringWithBlockAbstractParser
     String name = "";
     private Class<?> returnedType;
     private Map<String, Class> params;
-    private RawProgram rawProgram;
 
-    public FunctionParser(RawFunction rawFunction,OperatorsManager operatorsManager) {
+    public FunctionParser(RawFunction rawFunction,OperatorsManager operatorsManager, RawProgram rawProgram) {
         super(rawFunction.getCurrentCoordinate(), rawFunction.getCode(), null,null);
         this.rawProgram = rawFunction.getProgram();
         this.name = rawFunction.getName();
@@ -50,8 +48,9 @@ public class FunctionParser extends StringWithBlockAbstractParser
         this.rawProgram = rawProgram;
     }
 
-    public Function startParse() throws IOException, CloneNotSupportedException {
-        List<StringParser> operators = new LinkedList<>();
+    public Function parse() throws IOException, CloneNotSupportedException {
+        List<StringParser> rawOperators = new LinkedList<>();
+        List<Operator> operatorList = new LinkedList<>();
         nextChar();
         skipSpaceChars();
         while(!isEndOfFile())
@@ -61,11 +60,12 @@ public class FunctionParser extends StringWithBlockAbstractParser
             StringParser operator = convertToStringParser(rawOperator, this,startOperator);
             if(operator == null)
                 throw new RuntimeException("Не распознан токен\n" + startOperator);
-            operator.parse();
-            operators.add(operator);
+            Operator compiledOperator = operator.parse();
+            operatorList.add(compiledOperator);
+            rawOperators.add(operator);
             skipSpaceChars();
         }
-        return new Function(name,returnedType,params,operators);
+        return new Function(name,returnedType,params,operatorList);
     }
 
     @Override

@@ -1,8 +1,9 @@
 package com.protsenko.test.entity;
 
-import com.protsenko.compiler.Coordinate;
-import com.protsenko.test.parser.StringParser;
+import com.protsenko.test.Coordinate;
+import com.protsenko.test.parser.FunctionParser;
 
+import java.io.IOException;
 import java.util.Map;
 
 public class RawFunction
@@ -25,6 +26,10 @@ public class RawFunction
 
     public Coordinate getCurrentCoordinate() {
         return currentCoordinate;
+    }
+
+    public Function compile() throws IOException, CloneNotSupportedException {
+        return new FunctionParser(this, null, program).parse();
     }
 
     public String getCode() {

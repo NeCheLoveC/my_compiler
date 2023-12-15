@@ -1,6 +1,6 @@
 package com.protsenko.test.parser;
 
-import com.protsenko.compiler.Coordinate;
+import com.protsenko.test.Coordinate;
 
 import java.io.IOException;
 import java.util.LinkedList;

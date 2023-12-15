@@ -1,50 +1,53 @@
 package com.protsenko.test.statm;
 
-import com.protsenko.compiler.Coordinate;
-import com.protsenko.compiler.operators.Operator;
+import com.protsenko.test.Coordinate;
+import com.protsenko.test.entity.Operator;
 import com.protsenko.test.entity.RawFunction;
-import com.protsenko.test.entity.RawStatement;
+import com.protsenko.test.entity.RawProgram;
 import com.protsenko.test.parser.FunctionParser;
 
 import java.util.Map;
 
 public class FunctionCall implements UnitStatment, Operator
 {
-    private RawFunction function;
+    private String name;
+    private Map<String, String> params;
     private Coordinate coordinate;
+    private RawProgram rawProgram;
+    private String statement;
 
-    private Map<String, RawStatement> params;
+//    private Map<String, RawStatement> params;
 
-    public FunctionCall(RawFunction function, Map<String, RawStatement> params) {
-        this.function = function;
+
+    public FunctionCall(String name, Map<String, String> params, Coordinate coordinate, RawProgram rawProgram) {
+        this.name = name;
         this.params = params;
+        this.coordinate = coordinate;
+    }
+
+    public FunctionCall(String name, String statement, Coordinate coordinate, RawProgram rawProgram) {
+        this.name = name;
+        this.statement = statement;
+        this.coordinate = coordinate;
+        this.rawProgram = rawProgram;
     }
 
     @Override
     public Class getType() {
-        return function.getReturnedType();
+        return rawProgram.getRawFunctions().get(name).getReturnedType();
     }
 
     @Override
     public String convertToJavaCode() {
-        return null;
+        StringBuilder result = new StringBuilder();
+        result.append(name);
+        result.append("(");
+        result.append(statement);
+        result.append(")");
+        result.append(";\n");
+        return result.toString();
     }
 
-    public RawFunction getFunction() {
-        return function;
-    }
-
-    public void setFunction(RawFunction function) {
-        this.function = function;
-    }
-
-    public Map<String, RawStatement> getParams() {
-        return params;
-    }
-
-    public void setParams(Map<String, RawStatement> params) {
-        this.params = params;
-    }
 
     @Override
     public boolean validate(FunctionParser functionParser)
@@ -54,4 +57,6 @@ public class FunctionCall implements UnitStatment, Operator
             throw new RuntimeException("Не обнаружена функция\n" + coordinate);
         return true;
     }
+
+
 }

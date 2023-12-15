@@ -1,7 +1,5 @@
 package com.protsenko.compiler;
 
-import com.protsenko.compiler.operators.Operator;
-
 import java.util.*;
 
 public class Compiler

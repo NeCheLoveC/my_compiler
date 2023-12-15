@@ -1,7 +1,6 @@
 package com.protsenko.test.entity;
 
-import com.protsenko.compiler.Coordinate;
-import com.protsenko.test.parser.StringParser;
+import com.protsenko.test.Coordinate;
 
 public class RawStatement
 {

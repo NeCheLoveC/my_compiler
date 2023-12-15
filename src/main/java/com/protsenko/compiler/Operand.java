@@ -1,5 +1,7 @@
 package com.protsenko.compiler;
 
+import com.protsenko.test.Coordinate;
+
 public class Operand
 {
     private Class type;

@@ -1,12 +1,11 @@
 package com.protsenko.test;
 
-import com.protsenko.compiler.operators.Operator;
+import com.protsenko.test.entity.Operator;
 import com.protsenko.test.handlers.Handler;
 import com.protsenko.test.parser.FunctionParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
 import java.util.List;
 
 @Component

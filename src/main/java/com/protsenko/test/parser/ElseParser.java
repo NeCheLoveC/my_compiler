@@ -1,7 +1,6 @@
 package com.protsenko.test.parser;
 
-import com.protsenko.compiler.Coordinate;
-import com.protsenko.test.OperatorsManager;
+import com.protsenko.test.Coordinate;
 
 import java.io.IOException;
 
